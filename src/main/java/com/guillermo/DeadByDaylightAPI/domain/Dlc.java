@@ -1,13 +1,16 @@
 package com.guillermo.DeadByDaylightAPI.domain;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
+
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Data
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "dlc")
 public class Dlc {
     @Id
@@ -17,9 +20,11 @@ public class Dlc {
     private String name;
     @Column
     private double price;
-    @Column
+    @ManyToOne
+    @JoinColumn(name = "survivor")
     private Survivor survivor;
-    @Column
+    @ManyToOne
+    @JoinColumn(name = "killer")
     private Killer killer;
     @Column
     private int chapterNumber;

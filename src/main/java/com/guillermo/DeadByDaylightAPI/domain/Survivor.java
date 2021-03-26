@@ -1,16 +1,19 @@
 package com.guillermo.DeadByDaylightAPI.domain;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "survivor")
-public class Survivor {
+public class  Survivor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -22,5 +25,7 @@ public class Survivor {
     private String lore;
     @Column
     private int rating;
-    private List<Perk> perkList;
+
+    @OneToMany(mappedBy = "survivor")
+    private List<Perk> perkList = new ArrayList<>();
 }

@@ -1,13 +1,14 @@
 package com.guillermo.DeadByDaylightAPI.domain;
 
-import lombok.Builder;
-import lombok.Data;
+
+import lombok.*;
 
 import javax.persistence.*;
 
 
 @Data
-@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "perk")
 public class Perk {
     @Id
@@ -23,5 +24,9 @@ public class Perk {
     private String comment;
     @Column
     private Boolean exhaustion;
+    @Getter(AccessLevel.NONE)
+    @ManyToOne
+    @JoinColumn(name = "survivor_id" )
+    private Survivor survivor;
 
 }

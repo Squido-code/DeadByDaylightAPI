@@ -1,14 +1,15 @@
 package com.guillermo.DeadByDaylightAPI.domain;
 
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 
-@Data
-@Builder
+@Setter
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
 @Entity(name = "killer")
 public class Killer {
     @Id
@@ -24,4 +25,5 @@ public class Killer {
     private String difficulty;
     @Column
     private String power;
+
 }
