@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -30,9 +31,9 @@ public class DlcController {
                                                   @RequestParam (required = false) String releaseDate,
                                                   @RequestParam (required = false) String price){
         Set<Dlc> dlcSet = null;
-        Boolean chapterfilter = false;
-        Boolean dateFilter = false;
-        Boolean priceFilter = false;
+        boolean chapterfilter = false;
+        boolean dateFilter = false;
+        boolean priceFilter = false;
         //all dlc
         if(isAllEmpty(chapter,releaseDate,price)){
             logger.info("init findAll");
@@ -102,12 +103,10 @@ public class DlcController {
         logger.info("finished getDLC");
         return new ResponseEntity<>(dlcSet, HttpStatus.OK);
     }
+
     private Boolean isAllEmpty(String chapter,String releaseDate,String price){
         logger.info("init isAllEmpty");
-        if(chapter == null && releaseDate == null && price == null){
-            return true;
-        }
-        return false;
+        return chapter == null && releaseDate == null && price == null;
     }
 
 }

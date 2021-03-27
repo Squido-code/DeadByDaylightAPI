@@ -1,16 +1,15 @@
 package com.guillermo.DeadByDaylightAPI.controller;
 
-import com.guillermo.DeadByDaylightAPI.domain.Perk;
 import com.guillermo.DeadByDaylightAPI.domain.Survivor;
+import com.guillermo.DeadByDaylightAPI.exceptions.SurvivorNotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.SurvivorService;
+import com.guillermo.DeadByDaylightAPI.support.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -27,41 +26,41 @@ public class SurvivorController {
     private SurvivorService survivorService;
 
     @GetMapping("survivors")
-    public ResponseEntity<Set<Survivor>> getSurvivors(@RequestParam(required = false)String nationality,
-                                                      @RequestParam(required = false)String rating,
-                                                      @RequestParam(value ="date",required = false)String releaseDate){
+    public ResponseEntity<Set<Survivor>> getSurvivors(@RequestParam(required = false) String nationality,
+                                                      @RequestParam(required = false) String rating,
+                                                      @RequestParam(value = "date", required = false) String releaseDate) {
         Set<Survivor> survivorSet = null;
-        Boolean nationalityFilter = false;
-        Boolean ratingFilter = false;
-        Boolean dateFilter = false;
+        boolean nationalityFilter = false;
+        boolean ratingFilter = false;
+        boolean dateFilter = false;
 
         //all survivors
-        if(isAllEmpty(nationality,rating,releaseDate)){
+        if (isAllEmpty(nationality, rating, releaseDate)) {
             logger.info("initialized findAll");
             survivorSet = survivorService.findAll();
         }
         //parameters
-        if(nationality != null){
+        if (nationality != null) {
             logger.info("initialized findByNationality");
             survivorSet = survivorService.findByNationality(nationality);
             nationalityFilter = true;
         }
-        if(rating != null){
+        if (rating != null) {
             logger.info("initialized findByRating");
 
-            if(survivorSet != null){
+            if (survivorSet != null) {
                 Iterator<Survivor> iterator = survivorService.
                         findByRating(rating).
                         iterator();
-                while(iterator.hasNext()){
+                while (iterator.hasNext()) {
                     survivorSet.add(iterator.next());
                 }
-            }else{
-                survivorSet= survivorService.findByRating(rating);
+            } else {
+                survivorSet = survivorService.findByRating(rating);
             }
             ratingFilter = true;
         }
-        if(releaseDate != null) {
+        if (releaseDate != null) {
             logger.info("initialized findByReleaseDate");
             if (survivorSet != null) {
                 Iterator<Survivor> iterator = survivorService.
@@ -73,36 +72,79 @@ public class SurvivorController {
             } else {
                 survivorSet = survivorService.findByreleaseDate(releaseDate);
             }
-            dateFilter= true;
+            dateFilter = true;
         }
         //filter
-        if(nationalityFilter){
+        if (nationalityFilter) {
             Stream<Survivor> survivorStream = survivorSet.stream();
             survivorSet = survivorStream
                     .filter(survivor -> survivor.getNationality().equals(nationality))
                     .collect(Collectors.toSet());
         }
-        if(ratingFilter){
+        if (ratingFilter) {
             Stream<Survivor> survivorStream = survivorSet.stream();
             survivorSet = survivorStream
-                    .filter(survivor -> survivor.getRating()==Integer.parseInt(rating))
+                    .filter(survivor -> survivor.getRating() == Integer.parseInt(rating))
                     .collect(Collectors.toSet());
         }
-        if(dateFilter){
+        if (dateFilter) {
             Stream<Survivor> survivorStream = survivorSet.stream();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-            LocalDate localDate = LocalDate.parse(releaseDate,formatter);
+            LocalDate localDate = LocalDate.parse(releaseDate, formatter);
             survivorSet = survivorStream.filter(survivor -> survivor.getReleaseDate().equals(localDate)).
-                        collect(Collectors.toSet());
+                    collect(Collectors.toSet());
         }
         logger.info("finished getSurvivors");
         return new ResponseEntity<>(survivorSet, HttpStatus.OK);
 
     }
-    private Boolean isAllEmpty(String nationality, String rating, String releaseDate){
-        if(nationality == null && rating == null && releaseDate == null){
-            return true;
+
+    @GetMapping("/survivors/{id}")
+    public ResponseEntity<Survivor> getSurvivor(@PathVariable long id) {
+        logger.info("init getSurvivor");
+        Survivor survivor;
+        try {
+            survivor = survivorService.findById(id);
+        } catch (SurvivorNotFoundException ex) {
+            logger.error("survivor not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return false;
+        return new ResponseEntity<>(survivor, HttpStatus.OK);
+    }
+
+    @PostMapping("/addSurvivor")
+    public ResponseEntity<Survivor> addSurvivor(@RequestBody Survivor survivor) {
+        logger.info("init addSurvivor");
+        Survivor addedSurvivor = survivorService.addSurvivor(survivor);
+        return new ResponseEntity<>(addedSurvivor, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/survivors/{id}")
+    public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
+        logger.info("init deleteSurvivor");
+        try{
+            survivorService.deletedById(id);
+        }catch (SurvivorNotFoundException ex){
+            logger.error("survivor not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        survivorService.deletedById(id);
+        return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
+    }
+    @PutMapping("/survivors/{id}")
+    public ResponseEntity<Survivor> modifySurvivor(@PathVariable long id, @RequestBody Survivor newSurvivor) {
+        logger.info("init modifySurvivor");
+        Survivor survivor;
+        try{
+            survivor = survivorService.modifySurvivor(id, newSurvivor);
+        }catch (SurvivorNotFoundException ex){
+            logger.error("survivor not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(survivor, HttpStatus.OK);
+    }
+    private Boolean isAllEmpty(String nationality, String rating, String releaseDate) {
+        return nationality == null && rating == null && releaseDate == null;
     }
 }

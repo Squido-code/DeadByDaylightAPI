@@ -30,9 +30,9 @@ public class PerkController {
                                               @RequestParam(value = "survivor",required = false) String survivorName){
         logger.info("initizalized getPerks");
         Set<Perk> perkSet = null;
-        Boolean exhaustionFilter =false;
-        Boolean versionFilter = false;
-        Boolean survivorFilter = false;
+        boolean exhaustionFilter =false;
+        boolean versionFilter = false;
+        boolean survivorFilter = false;
 
         if(isAllempty(isExhaustion,versionNumber,survivorName)){
             logger.info("initialized findAll");
@@ -95,11 +95,9 @@ public class PerkController {
         return new ResponseEntity<>(perkSet, HttpStatus.OK);
 
     }
+
     private Boolean isAllempty(Boolean isExhaustion,String versionNumber, String survivorName){
         logger.info("init isAllempty");
-        if(isExhaustion == null && versionNumber==null && survivorName==null){
-            return true;
-        }
-        return false;
+        return isExhaustion == null && versionNumber == null && survivorName == null;
     }
 }

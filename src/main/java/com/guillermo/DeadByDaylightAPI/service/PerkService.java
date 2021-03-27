@@ -13,4 +13,6 @@ public interface PerkService {
     Set<Perk> findByVersionNumber(String version);
     Set<Perk> findBySurvivor(String survivor);
     Optional<Perk>findByName(String name);
+
+    Perk addPerk(Perk perk);
 }

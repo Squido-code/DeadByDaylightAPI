@@ -43,4 +43,9 @@ public class PerkServiceImpl implements PerkService{
     public Optional<Perk> findByName(String name) {
         return perkRepository.findByName(name);
     }
+
+    @Override
+    public Perk addPerk(Perk perk) {
+        return perkRepository.save(perk);
+    }
 }

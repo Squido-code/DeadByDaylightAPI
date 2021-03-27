@@ -29,6 +29,6 @@ public class  Survivor {
     @Column
     private String nationality;
 
-    @OneToMany(mappedBy = "survivor")
+    @OneToMany(mappedBy = "survivor",cascade = CascadeType.ALL)
     private List<Perk> perkList = new ArrayList<>();
 }

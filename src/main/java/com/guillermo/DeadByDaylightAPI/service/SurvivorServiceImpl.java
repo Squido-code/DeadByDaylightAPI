@@ -2,6 +2,7 @@ package com.guillermo.DeadByDaylightAPI.service;
 
 import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 
+import com.guillermo.DeadByDaylightAPI.exceptions.SurvivorNotFoundException;
 import com.guillermo.DeadByDaylightAPI.repository.SurvivorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -10,7 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Locale;
+import java.util.Optional;
 import java.util.Set;
 @Service
 public class SurvivorServiceImpl implements SurvivorService{
@@ -41,7 +42,26 @@ public class SurvivorServiceImpl implements SurvivorService{
     }
 
     @Override
-    public Survivor findByName(String name) {
-        return survivorRepository.findByName(name);
+    public Survivor findById(long id) throws SurvivorNotFoundException {
+        return survivorRepository.findById(id).orElseThrow(() -> new SurvivorNotFoundException(id));
+    }
+
+    @Override
+    public Survivor addSurvivor(Survivor survivor) {
+        return survivorRepository.save(survivor);
+    }
+
+    @Override
+    public void deletedById(long id) throws SurvivorNotFoundException{
+        survivorRepository.findById(id).orElseThrow(() -> new SurvivorNotFoundException(id));
+        survivorRepository.deleteById(id);
+    }
+
+    @Override
+    public Survivor modifySurvivor(long id, Survivor newSurvivor) throws SurvivorNotFoundException{
+        Survivor survivor = survivorRepository.findById(id)
+                .orElseThrow(() -> new SurvivorNotFoundException(id));
+        newSurvivor.setId(survivor.getId());
+        return survivorRepository.save(newSurvivor);
     }
 }
