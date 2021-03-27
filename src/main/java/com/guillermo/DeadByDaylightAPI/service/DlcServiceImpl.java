@@ -1,6 +1,8 @@
 package com.guillermo.DeadByDaylightAPI.service;
 
 import com.guillermo.DeadByDaylightAPI.domain.Dlc;
+import com.guillermo.DeadByDaylightAPI.domain.Survivor;
+import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.repository.DlcRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -39,5 +41,28 @@ public class DlcServiceImpl implements DlcService{
     @Override
     public Dlc findByName(String name) {
         return dlcRepository.findByName(name);
+    }
+
+    @Override
+    public Dlc findById(long id) throws NotFoundException{
+        return dlcRepository.findById(id).orElseThrow(() -> new NotFoundException(id));    }
+
+    @Override
+    public Dlc addDlc(Dlc dlc) {
+        return dlcRepository.save(dlc);
+    }
+
+    @Override
+    public void deletedById(long id) throws NotFoundException{
+        dlcRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
+        dlcRepository.deleteById(id);
+    }
+
+    @Override
+    public Dlc modifyDlc(long id, Dlc newDlc) throws  NotFoundException{
+        Dlc dlc = dlcRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(id));
+        newDlc.setId(dlc.getId());
+        return dlcRepository.save(newDlc);
     }
 }

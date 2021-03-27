@@ -128,7 +128,6 @@ public class SurvivorController {
             logger.error("survivor not found");
             return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"survivor not found"),HttpStatus.NOT_FOUND);
         }
-        survivorService.deletedById(id);
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
     @PutMapping("/survivors/{id}")

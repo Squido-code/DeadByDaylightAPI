@@ -2,15 +2,15 @@ package com.guillermo.DeadByDaylightAPI.controller;
 
 import com.guillermo.DeadByDaylightAPI.domain.Perk;
 import com.guillermo.DeadByDaylightAPI.domain.Survivor;
+import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.PerkService;
+import com.guillermo.DeadByDaylightAPI.support.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
 import java.util.Optional;
@@ -95,7 +95,50 @@ public class PerkController {
         return new ResponseEntity<>(perkSet, HttpStatus.OK);
 
     }
+    @GetMapping("/perks/{id}")
+    public ResponseEntity<Perk> getPerk(@PathVariable long id) {
+        logger.info("init getPerk");
+        Perk perk;
+        try {
+            perk = perkService.findById(id);
+        } catch (NotFoundException ex) {
+            logger.error("perk not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(perk, HttpStatus.OK);
+    }
 
+    @PostMapping("/addPerk")
+    public ResponseEntity<Perk> addPerk(@RequestBody Perk perk) {
+        logger.info("init addPerk");
+        Perk addPerk = perkService.addPerk(perk);
+        return new ResponseEntity<>(addPerk, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/perks/{id}")
+    public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
+        logger.info("init deletePerk");
+        try{
+            perkService.deletedById(id);
+        }catch (NotFoundException ex){
+            logger.error("survivor not found");
+            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"perk not found"),HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
+    }
+    @PutMapping("/perks/{id}")
+    public ResponseEntity<Perk> modifyPerk(@PathVariable long id, @RequestBody Perk newPerk) {
+        logger.info("init modifyPerk");
+        Perk perk;
+        try{
+            perk = perkService.modifyPerk(id, newPerk);
+        }catch (NotFoundException ex){
+            logger.error("Perk not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(perk, HttpStatus.OK);
+    }
     private Boolean isAllempty(Boolean isExhaustion,String versionNumber, String survivorName){
         logger.info("init isAllempty");
         return isExhaustion == null && versionNumber == null && survivorName == null;

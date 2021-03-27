@@ -15,5 +15,6 @@ public interface PerkRepository extends CrudRepository<Perk,Long> {
     Set<Perk> findByVersionNumber(String version);
     Set<Perk> findBySurvivor(Survivor survivor);
     Optional<Perk> findByName(String name);
+    Optional<Perk> findById(long id);
 
 }

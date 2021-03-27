@@ -2,16 +2,16 @@ package com.guillermo.DeadByDaylightAPI.controller;
 
 import com.guillermo.DeadByDaylightAPI.domain.Dlc;
 import com.guillermo.DeadByDaylightAPI.domain.Killer;
+import com.guillermo.DeadByDaylightAPI.domain.Survivor;
+import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.DlcService;
+import com.guillermo.DeadByDaylightAPI.support.Response;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -26,7 +26,7 @@ public class DlcController {
     @Autowired
     private DlcService dlcService;
 
-    @GetMapping("dlc")
+    @GetMapping("dlcs")
     public ResponseEntity<Set<Dlc>> getKillers(@RequestParam (required = false) String chapter,
                                                   @RequestParam (required = false) String releaseDate,
                                                   @RequestParam (required = false) String price){
@@ -103,7 +103,50 @@ public class DlcController {
         logger.info("finished getDLC");
         return new ResponseEntity<>(dlcSet, HttpStatus.OK);
     }
+    @GetMapping("/dlcs/{id}")
+    public ResponseEntity<Dlc> getDlc(@PathVariable long id) {
+        logger.info("init getDlc");
+        Dlc dlc;
+        try {
+            dlc = dlcService.findById(id);
+        } catch (NotFoundException ex) {
+            logger.error("dlc not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(dlc, HttpStatus.OK);
+    }
 
+    @PostMapping("/addDlc")
+    public ResponseEntity<Dlc> addDlc(@RequestBody Dlc dlc) {
+        logger.info("init addDlc");
+        Dlc addedDlc = dlcService.addDlc(dlc);
+        return new ResponseEntity<>(addedDlc, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/dlcs/{id}")
+    public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
+        logger.info("init deleteDlc");
+        try{
+            dlcService.deletedById(id);
+        }catch (NotFoundException ex){
+            logger.error("Dlc not found");
+            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"dlc not found"),HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
+    }
+    @PutMapping("/dlcs/{id}")
+    public ResponseEntity<Dlc> modifySurvivor(@PathVariable long id, @RequestBody Dlc newDlc) {
+        logger.info("init modifySurvivor");
+        Dlc dlc;
+        try{
+            dlc = dlcService.modifyDlc(id, newDlc);
+        }catch (NotFoundException ex){
+            logger.error("Dlc not found");
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(dlc, HttpStatus.OK);
+    }
     private Boolean isAllEmpty(String chapter,String releaseDate,String price){
         logger.info("init isAllEmpty");
         return chapter == null && releaseDate == null && price == null;
