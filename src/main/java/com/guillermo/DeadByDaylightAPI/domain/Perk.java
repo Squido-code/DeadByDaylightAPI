@@ -1,6 +1,7 @@
 package com.guillermo.DeadByDaylightAPI.domain;
 
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.*;
 
 import javax.persistence.*;
@@ -24,9 +25,9 @@ public class Perk {
     private String comment;
     @Column
     private Boolean exhaustion;
-    @Getter(AccessLevel.NONE)
     @ManyToOne
     @JoinColumn(name = "survivor_id" )
+    @JsonBackReference
     private Survivor survivor;
 
 }

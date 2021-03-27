@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @RestController
 public class PerkController {
@@ -28,14 +30,19 @@ public class PerkController {
                                               @RequestParam(value = "survivor",required = false) String survivorName){
         logger.info("initizalized getPerks");
         Set<Perk> perkSet = null;
+        Boolean exhaustionFilter =false;
+        Boolean versionFilter = false;
+        Boolean survivorFilter = false;
 
         if(isAllempty(isExhaustion,versionNumber,survivorName)){
             logger.info("initialized findAll");
             perkSet = perkService.findAll();
+
         }
         if(isExhaustion != null){
             logger.info("initizaliced findByexhaustion ");
             perkSet = perkService.findByExhaustion(isExhaustion);
+            exhaustionFilter=true;
         }
         if(versionNumber!= null){
             logger.info("initialized findByVersionNumber");
@@ -49,6 +56,7 @@ public class PerkController {
             }else{
                 perkSet= perkService.findByVersionNumber(versionNumber);
             }
+            versionFilter = true;
         }
         if(survivorName != null){
             logger.info("initialized findBySurvivor");
@@ -62,13 +70,33 @@ public class PerkController {
             }else{
                 perkSet = perkService.findBySurvivor(survivorName);
             }
-
+            survivorFilter = true;
+        }
+        //filters
+        if(exhaustionFilter){
+            Stream<Perk> perkStream = perkSet.stream();
+            perkSet = perkStream
+                    .filter(perk -> perk.getExhaustion() == isExhaustion)
+                    .collect(Collectors.toSet());
+        }
+        if(versionFilter){
+            Stream<Perk> perkStream = perkSet.stream();
+            perkSet = perkStream
+                    .filter(perk -> perk.getVersionNumber().equals(versionNumber))
+                    .collect(Collectors.toSet());
+        }
+        if(survivorFilter){
+            Stream<Perk> perkStream =perkSet.stream();
+            perkSet = perkStream
+                    .filter(perk -> perk.getSurvivor().getName().equals(survivorName))
+                    .collect(Collectors.toSet());
         }
         logger.info("finished getPerks");
         return new ResponseEntity<>(perkSet, HttpStatus.OK);
 
     }
     private Boolean isAllempty(Boolean isExhaustion,String versionNumber, String survivorName){
+        logger.info("init isAllempty");
         if(isExhaustion == null && versionNumber==null && survivorName==null){
             return true;
         }

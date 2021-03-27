@@ -14,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity(name = "survivor")
 public class  Survivor {
+    //String, int, float, boolean, LocalDate
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
@@ -25,6 +26,8 @@ public class  Survivor {
     private String lore;
     @Column
     private int rating;
+    @Column
+    private String nationality;
 
     @OneToMany(mappedBy = "survivor")
     private List<Perk> perkList = new ArrayList<>();
