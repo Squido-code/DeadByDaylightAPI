@@ -1,9 +1,17 @@
 package com.guillermo.DeadByDaylightAPI.controller;
 
 import com.guillermo.DeadByDaylightAPI.domain.Killer;
+import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.KillerService;
 import com.guillermo.DeadByDaylightAPI.support.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +25,17 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+@Tag(name = "Killers", description = "List of killers available")
 @RestController
 public class KillerController {
     private final Logger logger = LoggerFactory.getLogger(KillerController.class);
     @Autowired
     private KillerService killerService;
-
+    @Operation(summary = "Get a list of Killers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of killers",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Killer.class)))),
+    })
     @GetMapping("killers")
     public ResponseEntity<Set<Killer>> getKillers(@RequestParam(required = false) String difficulty,
                                                   @RequestParam(required = false) String power,
@@ -97,7 +109,11 @@ public class KillerController {
         logger.info("finished getKillers");
         return new ResponseEntity<>(killerSet, HttpStatus.OK);
     }
-
+    @Operation(summary = "Get an specific killer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Killer found", content = @Content(schema = @Schema(implementation = Killer.class))),
+            @ApiResponse(responseCode = "404", description = "The killer does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @GetMapping("/killers/{id}")
     public ResponseEntity<Killer> getKiller(@PathVariable long id) {
         logger.info("init getKiller");
@@ -110,14 +126,21 @@ public class KillerController {
         }
         return new ResponseEntity<>(killer, HttpStatus.OK);
     }
-
+    @Operation(summary = "Register a new killer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Killer registered", content = @Content(schema = @Schema(implementation = Killer.class)))
+    })
     @PostMapping("/addkiller")
     public ResponseEntity<Killer> addKiller(@RequestBody Killer killer) {
         logger.info("init addKiller");
         Killer addedKiller = killerService.addKiller(killer);
         return new ResponseEntity<>(addedKiller, HttpStatus.OK);
     }
-
+    @Operation(summary = "Delete a killer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Killer deleted", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Killer not found", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @DeleteMapping("/killers/{id}")
     public ResponseEntity<Response> deleteKiller(@PathVariable long id) {
         logger.info("init deleteKiller");
@@ -129,7 +152,11 @@ public class KillerController {
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
-
+    @Operation(summary = "Modify a killer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Killer modified", content = @Content(schema = @Schema(implementation = Killer.class))),
+            @ApiResponse(responseCode = "404", description = "The killer does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @PutMapping("/killers/{id}")
     public ResponseEntity<Killer> modifyKiller(@PathVariable long id, @RequestBody Killer newKiller) {
         logger.info("init modifyKiller");

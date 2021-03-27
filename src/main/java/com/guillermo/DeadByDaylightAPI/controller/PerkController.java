@@ -5,6 +5,13 @@ import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.PerkService;
 import com.guillermo.DeadByDaylightAPI.support.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +24,17 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+@Tag(name = "Perks", description = "List of survivors abilities")
 @RestController
 public class PerkController {
     private final Logger logger = LoggerFactory.getLogger(PerkController.class);
     @Autowired
     private PerkService perkService;
-
+    @Operation(summary = "Get a list of Perks")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of perks",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Perk.class)))),
+    })
     @GetMapping("perks")
     public ResponseEntity<Set<Perk>> getPerks(@RequestParam(value ="exhaustion", required = false)Boolean isExhaustion,
                                               @RequestParam(required = false) String versionNumber,
@@ -95,6 +106,11 @@ public class PerkController {
         return new ResponseEntity<>(perkSet, HttpStatus.OK);
 
     }
+    @Operation(summary = "Get an specific perk")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Perk found", content = @Content(schema = @Schema(implementation = Perk.class))),
+            @ApiResponse(responseCode = "404", description = "The PErk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @GetMapping("/perks/{id}")
     public ResponseEntity<Perk> getPerk(@PathVariable long id) {
         logger.info("init getPerk");
@@ -107,14 +123,21 @@ public class PerkController {
         }
         return new ResponseEntity<>(perk, HttpStatus.OK);
     }
-
+    @Operation(summary = "Register a new Perk")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Perk registered", content = @Content(schema = @Schema(implementation = Perk.class)))
+    })
     @PostMapping("/addPerk")
     public ResponseEntity<Perk> addPerk(@RequestBody Perk perk) {
         logger.info("init addPerk");
         Perk addPerk = perkService.addPerk(perk);
         return new ResponseEntity<>(addPerk, HttpStatus.OK);
     }
-
+    @Operation(summary = "Delete a specific perk")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Perk deleted", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Perk not found", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @DeleteMapping("/perks/{id}")
     public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
         logger.info("init deletePerk");
@@ -126,6 +149,11 @@ public class PerkController {
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
+    @Operation(summary = "Modify a specific perk")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Perk modified", content = @Content(schema = @Schema(implementation = Perk.class))),
+            @ApiResponse(responseCode = "404", description = "The Perk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @PutMapping("/perks/{id}")
     public ResponseEntity<Perk> modifyPerk(@PathVariable long id, @RequestBody Perk newPerk) {
         logger.info("init modifyPerk");

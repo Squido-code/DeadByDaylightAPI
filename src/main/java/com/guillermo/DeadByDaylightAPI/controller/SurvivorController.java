@@ -4,6 +4,13 @@ import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.SurvivorService;
 import com.guillermo.DeadByDaylightAPI.support.Response;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.ArraySchema;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,14 +24,18 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
+@Tag(name = "Survivors", description = "List of survivors available")
 @RestController
 public class SurvivorController {
     private final Logger logger = LoggerFactory.getLogger(SurvivorController.class);
 
     @Autowired
     private SurvivorService survivorService;
-
+    @Operation(summary = "Get a list of survivors")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of survivors",
+                    content = @Content(array = @ArraySchema(schema = @Schema(implementation = Survivor.class)))),
+    })
     @GetMapping("survivors")
     public ResponseEntity<Set<Survivor>> getSurvivors(@RequestParam(required = false) String nationality,
                                                       @RequestParam(required = false) String rating,
@@ -98,7 +109,11 @@ public class SurvivorController {
         return new ResponseEntity<>(survivorSet, HttpStatus.OK);
 
     }
-
+    @Operation(summary = "Get an specific survivor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Survivor found", content = @Content(schema = @Schema(implementation = Survivor.class))),
+            @ApiResponse(responseCode = "404", description = "The survivor does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @GetMapping("/survivors/{id}")
     public ResponseEntity<Survivor> getSurvivor(@PathVariable long id) {
         logger.info("init getSurvivor");
@@ -111,14 +126,21 @@ public class SurvivorController {
         }
         return new ResponseEntity<>(survivor, HttpStatus.OK);
     }
-
+    @Operation(summary = "Register a new survivor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Survivor registered", content = @Content(schema = @Schema(implementation = Survivor.class)))
+    })
     @PostMapping("/addSurvivor")
     public ResponseEntity<Survivor> addSurvivor(@RequestBody Survivor survivor) {
         logger.info("init addSurvivor");
         Survivor addedSurvivor = survivorService.addSurvivor(survivor);
         return new ResponseEntity<>(addedSurvivor, HttpStatus.OK);
     }
-
+    @Operation(summary = "Delete a survivor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Survivor deleted", content = @Content(schema = @Schema(implementation = Response.class))),
+            @ApiResponse(responseCode = "404", description = "Survivor not found", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @DeleteMapping("/survivors/{id}")
     public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
         logger.info("init deleteSurvivor");
@@ -130,6 +152,11 @@ public class SurvivorController {
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
+    @Operation(summary = "Modify a survivor")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Survivor modified", content = @Content(schema = @Schema(implementation = Survivor.class))),
+            @ApiResponse(responseCode = "404", description = "The survivor does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+    })
     @PutMapping("/survivors/{id}")
     public ResponseEntity<Survivor> modifySurvivor(@PathVariable long id, @RequestBody Survivor newSurvivor) {
         logger.info("init modifySurvivor");
