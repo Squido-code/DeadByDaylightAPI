@@ -2,7 +2,7 @@ package com.guillermo.DeadByDaylightAPI.service;
 
 import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 
-import com.guillermo.DeadByDaylightAPI.exceptions.SurvivorNotFoundException;
+import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.repository.SurvivorRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Optional;
 import java.util.Set;
 @Service
 public class SurvivorServiceImpl implements SurvivorService{
@@ -42,8 +41,8 @@ public class SurvivorServiceImpl implements SurvivorService{
     }
 
     @Override
-    public Survivor findById(long id) throws SurvivorNotFoundException {
-        return survivorRepository.findById(id).orElseThrow(() -> new SurvivorNotFoundException(id));
+    public Survivor findById(long id) throws NotFoundException {
+        return survivorRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
     }
 
     @Override
@@ -52,15 +51,15 @@ public class SurvivorServiceImpl implements SurvivorService{
     }
 
     @Override
-    public void deletedById(long id) throws SurvivorNotFoundException{
-        survivorRepository.findById(id).orElseThrow(() -> new SurvivorNotFoundException(id));
+    public void deletedById(long id) throws NotFoundException {
+        survivorRepository.findById(id).orElseThrow(() -> new NotFoundException(id));
         survivorRepository.deleteById(id);
     }
 
     @Override
-    public Survivor modifySurvivor(long id, Survivor newSurvivor) throws SurvivorNotFoundException{
+    public Survivor modifySurvivor(long id, Survivor newSurvivor) throws NotFoundException {
         Survivor survivor = survivorRepository.findById(id)
-                .orElseThrow(() -> new SurvivorNotFoundException(id));
+                .orElseThrow(() -> new NotFoundException(id));
         newSurvivor.setId(survivor.getId());
         return survivorRepository.save(newSurvivor);
     }

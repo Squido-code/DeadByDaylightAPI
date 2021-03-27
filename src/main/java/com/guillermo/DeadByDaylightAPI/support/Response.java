@@ -9,9 +9,8 @@ import lombok.Data;
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 public class Response {
 
-    public static final int NO_ERROR = 0;
-    public static final int NOT_FOUND = 101;
-
+    public static final int NOT_FOUND = 404;
+    public static  final int OK = 200;
     public static final String NO_MESSAGE = "";
 
     private Error error;
@@ -24,10 +23,10 @@ public class Response {
     }
 
     public static Response noErrorResponse() {
-        return new Response(new Error(NO_ERROR, NO_MESSAGE));
+        return new Response(new Error(OK, NO_MESSAGE));
     }
 
-    public static Response errorResonse(int errorCode, String errorMessage) {
+    public static Response errorResponse(int errorCode, String errorMessage) {
         return new Response(new Error(errorCode, errorMessage));
     }
 }

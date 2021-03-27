@@ -1,7 +1,7 @@
 package com.guillermo.DeadByDaylightAPI.controller;
 
 import com.guillermo.DeadByDaylightAPI.domain.Survivor;
-import com.guillermo.DeadByDaylightAPI.exceptions.SurvivorNotFoundException;
+import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.SurvivorService;
 import com.guillermo.DeadByDaylightAPI.support.Response;
 import org.slf4j.Logger;
@@ -105,7 +105,7 @@ public class SurvivorController {
         Survivor survivor;
         try {
             survivor = survivorService.findById(id);
-        } catch (SurvivorNotFoundException ex) {
+        } catch (NotFoundException ex) {
             logger.error("survivor not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -124,9 +124,9 @@ public class SurvivorController {
         logger.info("init deleteSurvivor");
         try{
             survivorService.deletedById(id);
-        }catch (SurvivorNotFoundException ex){
+        }catch (NotFoundException ex){
             logger.error("survivor not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"survivor not found"),HttpStatus.NOT_FOUND);
         }
         survivorService.deletedById(id);
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
@@ -137,7 +137,7 @@ public class SurvivorController {
         Survivor survivor;
         try{
             survivor = survivorService.modifySurvivor(id, newSurvivor);
-        }catch (SurvivorNotFoundException ex){
+        }catch (NotFoundException ex){
             logger.error("survivor not found");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
