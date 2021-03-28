@@ -146,7 +146,7 @@ public class DlcController {
     @Operation(summary = "Delete a DLC")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "DLC deleted", content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "404", description = "DLC not found", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "DLC not found", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @DeleteMapping("/dlcs/{id}")
     public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
@@ -155,7 +155,7 @@ public class DlcController {
             dlcService.deletedById(id);
         }catch (NotFoundException ex){
             log.error("Dlc not found");
-            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"dlc not found"),HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"dlc not found"),HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
