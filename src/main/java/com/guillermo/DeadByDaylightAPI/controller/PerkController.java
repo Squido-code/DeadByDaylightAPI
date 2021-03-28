@@ -1,7 +1,6 @@
 package com.guillermo.DeadByDaylightAPI.controller;
 
 import com.guillermo.DeadByDaylightAPI.domain.Perk;
-import com.guillermo.DeadByDaylightAPI.domain.Survivor;
 import com.guillermo.DeadByDaylightAPI.exceptions.NotFoundException;
 import com.guillermo.DeadByDaylightAPI.service.PerkService;
 import com.guillermo.DeadByDaylightAPI.support.Response;
@@ -12,6 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,14 +20,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Iterator;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+@Slf4j
 @Tag(name = "Perks", description = "List of survivors abilities")
 @RestController
 public class PerkController {
-    private final Logger logger = LoggerFactory.getLogger(PerkController.class);
+
     @Autowired
     private PerkService perkService;
     @Operation(summary = "Get a list of Perks")
@@ -39,24 +39,24 @@ public class PerkController {
     public ResponseEntity<Set<Perk>> getPerks(@RequestParam(value ="exhaustion", required = false)Boolean isExhaustion,
                                               @RequestParam(required = false) String versionNumber,
                                               @RequestParam(value = "survivor",required = false) String survivorName){
-        logger.info("initizalized getPerks");
+        log.info("initizalized getPerks");
         Set<Perk> perkSet = null;
         boolean exhaustionFilter =false;
         boolean versionFilter = false;
         boolean survivorFilter = false;
 
         if(isAllempty(isExhaustion,versionNumber,survivorName)){
-            logger.info("initialized findAll");
+            log.info("initialized findAll");
             perkSet = perkService.findAll();
 
         }
         if(isExhaustion != null){
-            logger.info("initizaliced findByexhaustion ");
+            log.info("initizaliced findByexhaustion ");
             perkSet = perkService.findByExhaustion(isExhaustion);
             exhaustionFilter=true;
         }
         if(versionNumber!= null){
-            logger.info("initialized findByVersionNumber");
+            log.info("initialized findByVersionNumber");
             if(perkSet != null){
                 Iterator<Perk> iterator = perkService.
                         findByVersionNumber(versionNumber).
@@ -70,7 +70,7 @@ public class PerkController {
             versionFilter = true;
         }
         if(survivorName != null){
-            logger.info("initialized findBySurvivor");
+            log.info("initialized findBySurvivor");
             if(perkSet != null){
                 Iterator<Perk> iterator = perkService.
                         findBySurvivor(survivorName).
@@ -102,73 +102,73 @@ public class PerkController {
                     .filter(perk -> perk.getSurvivor().getName().equals(survivorName))
                     .collect(Collectors.toSet());
         }
-        logger.info("finished getPerks");
+        log.info("finished getPerks");
         return new ResponseEntity<>(perkSet, HttpStatus.OK);
 
     }
     @Operation(summary = "Get an specific perk")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Perk found", content = @Content(schema = @Schema(implementation = Perk.class))),
-            @ApiResponse(responseCode = "404", description = "The PErk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "The PErk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @GetMapping("/perks/{id}")
     public ResponseEntity<Perk> getPerk(@PathVariable long id) {
-        logger.info("init getPerk");
+        log.info("init getPerk");
         Perk perk;
         try {
             perk = perkService.findById(id);
         } catch (NotFoundException ex) {
-            logger.error("perk not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.error("perk not found");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(perk, HttpStatus.OK);
     }
     @Operation(summary = "Register a new Perk")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Perk registered", content = @Content(schema = @Schema(implementation = Perk.class)))
+            @ApiResponse(responseCode = "201", description = "Perk registered", content = @Content(schema = @Schema(implementation = Perk.class)))
     })
     @PostMapping("/addPerk")
     public ResponseEntity<Perk> addPerk(@RequestBody Perk perk) {
-        logger.info("init addPerk");
+        log.info("init addPerk");
         Perk addPerk = perkService.addPerk(perk);
-        return new ResponseEntity<>(addPerk, HttpStatus.OK);
+        return new ResponseEntity<>(addPerk, HttpStatus.CREATED);
     }
     @Operation(summary = "Delete a specific perk")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Perk deleted", content = @Content(schema = @Schema(implementation = Response.class))),
-            @ApiResponse(responseCode = "404", description = "Perk not found", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "Perk not found", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @DeleteMapping("/perks/{id}")
     public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
-        logger.info("init deletePerk");
+        log.info("init deletePerk");
         try{
             perkService.deletedById(id);
         }catch (NotFoundException ex){
-            logger.error("survivor not found");
-            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"perk not found"),HttpStatus.NOT_FOUND);
+            log.error("survivor not found");
+            return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"perk not found"),HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
     }
     @Operation(summary = "Modify a specific perk")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Perk modified", content = @Content(schema = @Schema(implementation = Perk.class))),
-            @ApiResponse(responseCode = "404", description = "The Perk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "The Perk does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @PutMapping("/perks/{id}")
     public ResponseEntity<Perk> modifyPerk(@PathVariable long id, @RequestBody Perk newPerk) {
-        logger.info("init modifyPerk");
+        log.info("init modifyPerk");
         Perk perk;
         try{
             perk = perkService.modifyPerk(id, newPerk);
         }catch (NotFoundException ex){
-            logger.error("Perk not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.error("Perk not found");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity<>(perk, HttpStatus.OK);
     }
     private Boolean isAllempty(Boolean isExhaustion,String versionNumber, String survivorName){
-        logger.info("init isAllempty");
+        log.info("init isAllempty");
         return isExhaustion == null && versionNumber == null && survivorName == null;
     }
 }

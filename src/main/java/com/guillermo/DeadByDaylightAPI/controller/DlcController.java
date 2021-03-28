@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,10 +27,11 @@ import java.util.Iterator;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+@Slf4j
 @Tag(name = "DLCs", description = "List of published DLCs")
 @RestController
 public class DlcController {
-    private final Logger logger = LoggerFactory.getLogger(DlcController.class);
+//    private final Logger logger = LoggerFactory.getLogger(DlcController.class);
     @Autowired
     private DlcService dlcService;
     @Operation(summary = "Get a list of DLCs")
@@ -47,18 +49,18 @@ public class DlcController {
         boolean priceFilter = false;
         //all dlc
         if(isAllEmpty(chapter,releaseDate,price)){
-            logger.info("init findAll");
+            log.info("init findAll");
             dlcSet = dlcService.findAll();
         }
         //parameters
         if(chapter != null){
-            logger.info("init findByChapter");
+            log.info("init findByChapter");
             dlcSet = dlcService.findByChapter(chapter);
             chapterfilter=true;
         }
 
         if(releaseDate != null) {
-            logger.info("init findByReleaseDate");
+            log.info("init findByReleaseDate");
             if (dlcSet != null) {
                 Iterator<Dlc> iterator = dlcService
                         .findByReleaseDate(releaseDate)
@@ -73,7 +75,7 @@ public class DlcController {
         }
 
         if(price != null){
-            logger.info("init findByPrice");
+            log.info("init findByPrice");
             if(dlcSet != null){
                 Iterator<Dlc> iterator = dlcService
                         .findByPrice(price)
@@ -88,14 +90,14 @@ public class DlcController {
         }
         //filters
         if(chapterfilter){
-            logger.info("init chapterFilter");
+            log.info("init chapterFilter");
             Stream<Dlc> dlcStream = dlcSet.stream();
             dlcSet = dlcStream
                     .filter(dlc -> dlc.getChapterNumber() == Integer.parseInt(chapter))
                     .collect(Collectors.toSet());
         }
         if(dateFilter){
-            logger.info("init dateFilter");
+            log.info("init dateFilter");
             Stream<Dlc> dlcStream = dlcSet.stream();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             LocalDate localDate = LocalDate.parse(releaseDate,formatter);
@@ -104,42 +106,42 @@ public class DlcController {
                     .collect(Collectors.toSet());
         }
         if(priceFilter){
-            logger.info("init priceFilter");
+            log.info("init priceFilter");
             Stream<Dlc> dlcStream = dlcSet.stream();
             double doublePrice = Double.parseDouble(price);
             dlcSet = dlcStream
                     .filter(dlc -> dlc.getPrice() == doublePrice)
                     .collect(Collectors.toSet());
         }
-        logger.info("finished getDLC");
+        log.info("finished getDLC");
         return new ResponseEntity<>(dlcSet, HttpStatus.OK);
     }
     @Operation(summary = "Get an specific DLC")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "DLC found", content = @Content(schema = @Schema(implementation = Dlc.class))),
-            @ApiResponse(responseCode = "404", description = "The DLC does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "The DLC does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @GetMapping("/dlcs/{id}")
     public ResponseEntity<Dlc> getDlc(@PathVariable long id) {
-        logger.info("init getDlc");
+        log.info("init getDlc");
         Dlc dlc;
         try {
             dlc = dlcService.findById(id);
         } catch (NotFoundException ex) {
-            logger.error("dlc not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.error("dlc not found");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
         return new ResponseEntity<>(dlc, HttpStatus.OK);
     }
     @Operation(summary = "Register a new DLC")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "DLC registered", content = @Content(schema = @Schema(implementation = Dlc.class)))
+            @ApiResponse(responseCode = "201", description = "DLC registered", content = @Content(schema = @Schema(implementation = Dlc.class)))
     })
     @PostMapping("/addDlc")
     public ResponseEntity<Dlc> addDlc(@RequestBody Dlc dlc) {
-        logger.info("init addDlc");
+        log.info("init addDlc");
         Dlc addedDlc = dlcService.addDlc(dlc);
-        return new ResponseEntity<>(addedDlc, HttpStatus.OK);
+        return new ResponseEntity<>(addedDlc, HttpStatus.CREATED);
     }
     @Operation(summary = "Delete a DLC")
     @ApiResponses(value = {
@@ -148,11 +150,11 @@ public class DlcController {
     })
     @DeleteMapping("/dlcs/{id}")
     public ResponseEntity<Response> deleteSurvivor(@PathVariable long id) {
-        logger.info("init deleteDlc");
+        log.info("init deleteDlc");
         try{
             dlcService.deletedById(id);
         }catch (NotFoundException ex){
-            logger.error("Dlc not found");
+            log.error("Dlc not found");
             return new ResponseEntity<>(Response.errorResponse(Response.NOT_FOUND,"dlc not found"),HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(Response.noErrorResponse(), HttpStatus.OK);
@@ -160,23 +162,23 @@ public class DlcController {
     @Operation(summary = "Modify a DLC")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "DLC modified", content = @Content(schema = @Schema(implementation = Dlc.class))),
-            @ApiResponse(responseCode = "404", description = "The DLC does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
+            @ApiResponse(responseCode = "204", description = "The DLC does not exist", content = @Content(schema = @Schema(implementation = Response.class)))
     })
     @PutMapping("/dlcs/{id}")
     public ResponseEntity<Dlc> modifySurvivor(@PathVariable long id, @RequestBody Dlc newDlc) {
-        logger.info("init modifySurvivor");
+        log.info("init modifySurvivor");
         Dlc dlc;
         try{
             dlc = dlcService.modifyDlc(id, newDlc);
         }catch (NotFoundException ex){
-            logger.error("Dlc not found");
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            log.error("Dlc not found");
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         return new ResponseEntity<>(dlc, HttpStatus.OK);
     }
     private Boolean isAllEmpty(String chapter,String releaseDate,String price){
-        logger.info("init isAllEmpty");
+        log.info("init isAllEmpty");
         return chapter == null && releaseDate == null && price == null;
     }
 
