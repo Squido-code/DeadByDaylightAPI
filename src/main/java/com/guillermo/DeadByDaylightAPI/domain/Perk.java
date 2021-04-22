@@ -34,7 +34,7 @@ public class Perk {
     private Boolean exhaustion;
     @Schema(description = "Who has the perk", example = "Feng Min", required = true)
     @ManyToOne
-    @JoinColumn(name = "survivor_id" )
+    @JoinColumn(name = "survivor" )
     @JsonBackReference
     private Survivor survivor;
 
